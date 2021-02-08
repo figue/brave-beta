@@ -28,7 +28,7 @@ fi
 pkgname=brave-beta
 pkgver=1.21.44
 pkgrel=1
-pkgdesc='A web browser that stops ads and trackers by default'
+pkgdesc='A web browser that stops ads and trackers by default. Beta Channel'
 arch=('x86_64')
 url='https://www.brave.com/download'
 license=('custom')
