@@ -26,7 +26,7 @@ fi
 ##
 
 pkgname=brave-beta
-pkgver=1.21.44
+pkgver=1.21.51
 pkgrel=1
 pkgdesc='A web browser that stops ads and trackers by default. Beta Channel'
 arch=('x86_64')
@@ -43,11 +43,15 @@ chromium_base_ver="88"
 patchset="3"
 patchset_name="chromium-${chromium_base_ver}-patchset-${patchset}"
 _launcher_ver=6
-source=("https://github.com/brave/brave-browser/archive/v${pkgver}.tar.gz"
+source=("brave-browser::git+https://github.com/brave/brave-browser.git#tag=v${pkgver}"
+        "git+https://chromium.googlesource.com/chromium/tools/depot_tools.git"
+        "git+https://github.com/brave/brave-core.git#tag=v${pkgver}"
+        "git+https://github.com/brave/adblock-rust.git"
         'brave-launcher'
         'brave-browser-beta.desktop'
         "chromium-launcher-$_launcher_ver.tar.gz::https://github.com/foutrelis/chromium-launcher/archive/v$_launcher_ver.tar.gz"
-        "https://github.com/stha09/chromium-patches/releases/download/${patchset_name}/${patchset_name}.tar.xz")
+        "https://github.com/stha09/chromium-patches/releases/download/${patchset_name}/${patchset_name}.tar.xz"
+        "chromium-no-history.patch" "chromium-no-history2.patch")
 arch_revision=4332a9b5a5f7e1d5ec8e95ee51581c3e55450f41
 for Patches in \
 	subpixel-anti-aliasing-in-FreeType-2.8.1.patch
@@ -55,15 +59,20 @@ do
   source+=("${Patches}::https://git.archlinux.org/svntogit/packages.git/plain/trunk/${Patches}?h=packages/chromium&id=${arch_revision}")
 done
 
-sha256sums=('000c5380814279d1a1a259da458f0efce6e6c63d34c7df7451529b538f9cbb0a'
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP'
             '8202fdc1dffd5839860b023cfb9fea54c25e886df1070453b939201e0df067e9'
             '262d51ae66c14cb596ea3c46660d01ed7883ba68b5e8d005e74b9ecc4a5e355f'
             '04917e3cd4307d8e31bfb0027a5dce6d086edb10ff8a716024fbb8bb0c7dccf1'
             'e5a60a4c9d0544d3321cc241b4c7bd4adb0a885f090c6c6c21581eac8e3b4ba9'
+            'ea3446500d22904493f41be69e54557e984a809213df56f3cdf63178d2afb49e'
+            'd7775ffcfc25eace81b3e8db23d62562afb3dbb5904d3cbce2081f3fe1b3067d'
             '1e2913e21c491d546e05f9b4edf5a6c7a22d89ed0b36ef692ca6272bcd5faec6')
 
 prepare() {
-  cd "brave-browser-${pkgver}"
+  cd "brave-browser"
 
   # Hack to prioritize python2 in PATH
   mkdir -p "${srcdir}/bin"
@@ -73,6 +82,21 @@ prepare() {
 
   msg2 "Prepare the environment..."
   npm install
+  patch -Np1 -i ../chromium-no-history.patch
+
+  git submodule init
+  git config submodule.depot_tools.url "${srcdir}"/depot_tools
+  git config submodule.brave-core.url "${srcdir}"/brave
+  git config submodule.adblock-rust.url "${srcdir}"/adblock-rust
+  git submodule update
+  mkdir -p src
+  cp -rT "${srcdir}"/brave-core src/brave
+  cp -r "${srcdir}"/depot_tools src/brave/vendor/
+  cp -rT "${srcdir}"/adblock-rust src/brave/vendor/adblock_rust_ffi
+
+  patch -Np1 -i ../chromium-no-history2.patch
+
+  msg2 "Running \"npm run\""
   if [ -d src/out/Release ]; then
     npm run sync -- --force
   else
@@ -102,10 +126,13 @@ prepare() {
 
   # Hacky patching
   sed -e 's/enable_distro_version_check = true/enable_distro_version_check = false/g' -i chrome/installer/linux/BUILD.gn
+
+  # Force rebuild rust source
+  touch brave/build/rust/Cargo.toml
 }
 
 build() {
-  cd "brave-browser-${pkgver}"
+  cd "brave-browser"
 
   if check_buildoption ccache y; then
     # Avoid falling back to preprocessor mode when sources contain time macros
@@ -157,9 +184,8 @@ package() {
   install -d -m0755 "${pkgdir}/usr/lib/${pkgname}/"{,swiftshader,locales,resources}
 
   # Copy necessary release files
-  cd "brave-browser-${pkgver}/src/out/Release"
+  cd "brave-browser/src/out/Release"
   cp -a --reflink=auto \
-    WidevineCdm \
     MEIPreload \
     brave \
     brave_*.pak \
@@ -184,7 +210,7 @@ package() {
   cd "${srcdir}"
   install -Dm0755 brave-launcher "${pkgdir}/usr/bin/${pkgname}"
   install -Dm0644 -t "${pkgdir}/usr/share/applications/" brave-browser-beta.desktop
-  install -Dm0644 "brave-browser-${pkgver}/src/brave/app/theme/brave/product_logo_128.png" "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
+  install -Dm0644 "brave-browser/src/brave/app/theme/brave/product_logo_128.png" "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
   install -Dm0644 -t "${pkgdir}/usr/share/licenses/${pkgname}" "brave-browser-${pkgver}/LICENSE"
 }
 

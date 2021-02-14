@@ -1,6 +1,6 @@
 pkgbase = brave-beta
 	pkgdesc = A web browser that stops ads and trackers by default. Beta Channel
-	pkgver = 1.21.44
+	pkgver = 1.21.51
 	pkgrel = 1
 	url = https://www.brave.com/download
 	arch = x86_64
@@ -27,17 +27,27 @@ pkgbase = brave-beta
 	optdepends = org.freedesktop.secrets: password storage backend on GNOME / Xfce
 	optdepends = kwallet: for storing passwords in KWallet on KDE desktops
 	optdepends = sccache: For faster builds
-	source = https://github.com/brave/brave-browser/archive/v1.21.44.tar.gz
+	source = brave-browser::git+https://github.com/brave/brave-browser.git#tag=v1.21.51
+	source = git+https://chromium.googlesource.com/chromium/tools/depot_tools.git
+	source = git+https://github.com/brave/brave-core.git#tag=v1.21.51
+	source = git+https://github.com/brave/adblock-rust.git
 	source = brave-launcher
 	source = brave-browser-beta.desktop
 	source = chromium-launcher-6.tar.gz::https://github.com/foutrelis/chromium-launcher/archive/v6.tar.gz
 	source = https://github.com/stha09/chromium-patches/releases/download/chromium-88-patchset-3/chromium-88-patchset-3.tar.xz
+	source = chromium-no-history.patch
+	source = chromium-no-history2.patch
 	source = subpixel-anti-aliasing-in-FreeType-2.8.1.patch::https://git.archlinux.org/svntogit/packages.git/plain/trunk/subpixel-anti-aliasing-in-FreeType-2.8.1.patch?h=packages/chromium&id=4332a9b5a5f7e1d5ec8e95ee51581c3e55450f41
-	sha256sums = 000c5380814279d1a1a259da458f0efce6e6c63d34c7df7451529b538f9cbb0a
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
+	sha256sums = SKIP
 	sha256sums = 8202fdc1dffd5839860b023cfb9fea54c25e886df1070453b939201e0df067e9
 	sha256sums = 262d51ae66c14cb596ea3c46660d01ed7883ba68b5e8d005e74b9ecc4a5e355f
 	sha256sums = 04917e3cd4307d8e31bfb0027a5dce6d086edb10ff8a716024fbb8bb0c7dccf1
 	sha256sums = e5a60a4c9d0544d3321cc241b4c7bd4adb0a885f090c6c6c21581eac8e3b4ba9
+	sha256sums = ea3446500d22904493f41be69e54557e984a809213df56f3cdf63178d2afb49e
+	sha256sums = d7775ffcfc25eace81b3e8db23d62562afb3dbb5904d3cbce2081f3fe1b3067d
 	sha256sums = 1e2913e21c491d546e05f9b4edf5a6c7a22d89ed0b36ef692ca6272bcd5faec6
 
 pkgname = brave-beta
