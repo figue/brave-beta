@@ -127,8 +127,8 @@ prepare() {
   # Hacky patching
   sed -e 's/enable_distro_version_check = true/enable_distro_version_check = false/g' -i chrome/installer/linux/BUILD.gn
 
-  # Force rebuild rust source
-  touch brave/build/rust/Cargo.toml
+  # Workaround to force rebuild rust source
+  #touch brave/build/rust/Cargo.toml
 }
 
 build() {
@@ -194,6 +194,7 @@ package() {
     v8_context_snapshot.bin \
     libGLESv2.so \
     libEGL.so \
+    icudtl.dat \
     "${pkgdir}/usr/lib/${pkgname}/"
   cp -a --reflink=auto \
     swiftshader/libGLESv2.so \
@@ -211,7 +212,7 @@ package() {
   install -Dm0755 brave-launcher "${pkgdir}/usr/bin/${pkgname}"
   install -Dm0644 -t "${pkgdir}/usr/share/applications/" brave-browser-beta.desktop
   install -Dm0644 "brave-browser/src/brave/app/theme/brave/product_logo_128.png" "${pkgdir}/usr/share/pixmaps/${pkgname}.png"
-  install -Dm0644 -t "${pkgdir}/usr/share/licenses/${pkgname}" "brave-browser-${pkgver}/LICENSE"
+  install -Dm0644 -t "${pkgdir}/usr/share/licenses/${pkgname}" "brave-browser/LICENSE"
 }
 
 # vim:set ts=4 sw=4 et:
